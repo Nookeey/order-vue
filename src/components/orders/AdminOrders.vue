@@ -93,6 +93,8 @@
 import CreateOrder from '../layout/CreateOrder'
 import InfoOrder from '../layout/InfoOrder'
 import db from '../../firebase/init'
+import firebase from 'firebase'
+import moment from 'moment'
 
 export default {
   name: 'AdminOrders',
@@ -107,6 +109,21 @@ export default {
     }
   },
   methods: {
+    logoutIfNewDay () {
+      let user = firebase.auth().currentUser
+      if (user) {
+        let ref = db.collection('admin').doc('admin')
+        ref.get().then(doc => {
+          if (doc.exists) {
+            if (moment(doc.data().timestamp).format('l') !== moment(this.timestamp).format('l')) {
+              firebase.auth().signOut().then(() => {
+                this.$router.push({ name: 'Login' })
+              })
+            }
+          }
+        })
+      }
+    },
     // accept order
     accept (id) {
       db.collection('orders').doc(id).update({
@@ -131,6 +148,7 @@ export default {
     }
   },
   created () {
+    this.logoutIfNewDay()
     // get accepted orders
     db.collection('orders').where('accepted', '==', true)
       .onSnapshot((snapshot) => {

@@ -5,20 +5,24 @@
         <form @submit.prevent="login" class="col s12">
           <div class="card-content">
             <div class="row">
-                <div class="row center">
-                  <span class="card-title teal-text darken-1">ZALOGUJ SIĘ</span>
+              <div class="row center">
+                <span class="card-title teal-text darken-1">ZALOGUJ SIĘ</span>
+              </div>
+              <div class="row">
+                <div class="input-field col s12">
+                  <input id="password" type="password" v-model="password">
+                  <label for="password">Hasło:</label>
                 </div>
-                <div class="row">
-                  <div class="input-field col s12">
-                    <input id="password" type="password" v-model="password">
-                    <label for="password">Hasło:</label>
-                  </div>
+              </div>
+              <div class="row center">
+                <div class="input-field col s12">
+                  <transition name="alert-in" enter-active-class="animated flipInX" leave-active-class="animated flipOutX">
+                    <div v-if="feedback" class="alert alert-danger">{{ feedback }}</div>
+                  </transition>
+                  <button type="submit" class="waves-effect waves-light btn teal darken-2">Zaloguj</button>
                 </div>
+              </div>
             </div>
-          </div>
-          <div class="card-action center">
-            <button type="submit" class="waves-effect waves-light btn teal darken-2">Zaloguj</button>
-            <p v-if="feedback" class="red-text">{{ feedback }}</p>
           </div>
         </form>
       </div>
@@ -42,7 +46,25 @@ export default {
       timestamp: Date.now()
     }
   },
+  created () {
+    this.logoutIfNewDay()
+  },
   methods: {
+    logoutIfNewDay () {
+      let user = firebase.auth().currentUser
+      if (user) {
+        let ref = db.collection('admin').doc('admin')
+        ref.get().then(doc => {
+          if (doc.exists) {
+            if (moment(doc.data().timestamp).format('l') !== moment(this.timestamp).format('l')) {
+              firebase.auth().signOut().then(() => {
+                this.$router.push({ name: 'Login' })
+              })
+            }
+          }
+        })
+      }
+    },
     login () {
       if (this.password) {
         let ref = db.collection('admin').doc('admin')
@@ -59,6 +81,9 @@ export default {
                   })
               } else {
                 this.feedback = 'Admin Zajęty! Nieprawidłowe hasło!'
+                setTimeout(() => {
+                  this.feedback = null
+                }, 4000)
               }
             } else {
               firebase.auth().signInWithEmailAndPassword(this.email, this.pass)
@@ -102,6 +127,9 @@ export default {
         })
       } else {
         this.feedback = 'Musisz podać hasło!'
+        setTimeout(() => {
+          this.feedback = null
+        }, 4000)
       }
     }
   }
