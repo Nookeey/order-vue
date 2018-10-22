@@ -130,13 +130,6 @@ export default {
           }
         })
       })
-
-    setTimeout(() => {
-      console.log(this.deadline)
-      const hours = this.deadline.match(/^(\d+)/)[1]
-      const minutes = this.deadline.match(/:(\d+)/)[1]
-      console.log([parseInt(hours), parseInt(minutes)])
-    }, 1000)
   },
   methods: {
     logout () {

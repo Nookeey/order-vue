@@ -29,7 +29,6 @@
             </transition>
             <button type="submit" class="waves-effect waves-light btn teal darken-2" :disabled="!deadlineStatus">Dodaj</button>
           </form>
-          <button @click="deadlineStatus = !deadlineStatus">Toggle Deadline Status</button>
         </div>
       </div>
     </div>
@@ -61,19 +60,24 @@ export default {
       price: null,
       dish: null,
       deadline: null,
-      currnetTime: moment(Date.now()).format('LTS'),
       deadlineStatus: true
     }
   },
   created () {
-    // setInterval(() => {
-    //   this.currnetTime = moment(Date.now()).format('LTS')
-    //   if (this.currnetTime >= this.deadline) {
-    //     this.deadlineStatus = true
-    //   } else {
-    //     this.deadlineStatus = false
-    //   }
-    // }, 1000)
+    setInterval(() => {
+      let currnetTime = moment(Date.now()).format('LT')
+      let deadlineHours = this.deadline.match(/^(\d+)/)[1]
+      let deadlineMinutes = this.deadline.match(/:(\d+)/)[1]
+      let currnetTimeHours = currnetTime.match(/^(\d+)/)[1]
+      let currnetTimeMinutes = currnetTime.match(/:(\d+)/)[1]
+      let deadlineTemp = parseInt(deadlineHours + deadlineMinutes)
+      let currnetTimeTemp = parseInt(currnetTimeHours + currnetTimeMinutes)
+      if (currnetTimeTemp >= deadlineTemp) {
+        this.deadlineStatus = false
+      } else {
+        this.deadlineStatus = true
+      }
+    }, 1000)
 
     db.collection('information')
       .onSnapshot((snapshot) => {
@@ -123,4 +127,5 @@ export default {
   #create-order .row { margin-bottom: 0; }
   #create-order .alert-success { margin-top: 3em; }
   #create-order .alert-success span { display: block; margin: 0 auto; }
+  #create-order .btn[disabled] { background-color: #DFDFDF !important; }
 </style>
