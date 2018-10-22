@@ -34,7 +34,7 @@
                     </td>
                     <td class="right-align">
                       <a @click="deleteOrder(order.id)" class="btn-floating btn-small waves-effect waves-light red"><i class="material-icons">delete_forever</i></a>
-                      <a class="btn-floating btn-small waves-effect waves-light blue"><i class="material-icons">create</i></a>
+                      <a @click="setOrder(order, '#modalUpdateOrder')" class="btn-floating btn-small waves-effect waves-light blue"><i class="material-icons">create</i></a>
                     </td>
                   </tr>
                 </tbody>
@@ -75,7 +75,7 @@
                     </td>
                     <td class="right-align">
                       <a @click="deleteNewOrder(order.id)" class="btn-floating btn-small waves-effect waves-light red"><i class="material-icons">delete_forever</i></a>
-                      <a class="btn-floating btn-small waves-effect waves-light blue"><i class="material-icons">create</i></a>
+                      <a @click="setOrder(order, '#modalUpdateOrder')" class="btn-floating btn-small waves-effect waves-light blue"><i class="material-icons">create</i></a>
                       <a @click="accept(order.id)" class="btn-floating btn-small waves-effect waves-light green"><i class="material-icons">check</i></a>
                     </td>
                   </tr>
@@ -86,6 +86,44 @@
         </div>
       </section>
     </div>
+
+    <div class="overflow"></div>
+    <!-- START MODAL UPDATE ORDER -->
+    <div id="modalUpdateOrder" class="modal">
+      <form @submit.prevent="updateOrder" class="col s12">
+        <div class="modal-content">
+            <div class="row mb">
+              <span class="card-title teal-text darken-1">EDYTUJ ZAMOWIENIE</span>
+            </div>
+            <div class="row">
+              <div class="input-field col s12">
+                <input id="customer" type="text" v-model="customer">
+                <label for="customer" class="active">Imię</label>
+              </div>
+            </div>
+            <div class="row">
+              <div class="input-field col s12">
+                <textarea id="dish" class="materialize-textarea" v-model="dish"></textarea>
+                <label for="dish" class="active">Danie</label>
+              </div>
+            </div>
+            <div class="row">
+              <div class="input-field col s12">
+                <input id="price" type="number" v-model="price">
+                <label for="price" class="active">Cena</label>
+              </div>
+            </div>
+            <transition name="alert-in" enter-active-class="animated flipInX" leave-active-class="animated flipOutX">
+              <div v-if="feedback" class="alert alert-danger">{{ feedback }}</div>
+            </transition>
+        </div>
+        <div class="modal-footer">
+          <a @click="hideModal('#modalUpdateOrder')" class="modal-close waves-effect waves-green btn-flat">Anuluj</a>
+          <button type="submit" class="waves-effect waves-light btn teal darken-2">Zapisz</button>
+        </div>
+      </form>
+    </div>
+    <!-- END MODAL UPDATE ORDER -->
   </div>
 </template>
 
@@ -95,6 +133,7 @@ import InfoOrder from '../layout/InfoOrder'
 import db from '../../firebase/init'
 import firebase from 'firebase'
 import moment from 'moment'
+import $ from 'jquery'
 
 export default {
   name: 'AdminOrders',
@@ -104,8 +143,15 @@ export default {
   },
   data () {
     return {
+      id: null,
+      customer: null,
+      dish: null,
+      price: null,
       orders: [],
-      ordersNew: []
+      ordersNew: [],
+      feedback: null,
+      modalName: null,
+      updateOrderStatus: false
     }
   },
   methods: {
@@ -145,6 +191,37 @@ export default {
       db.collection('orders').doc(id).update({
         ispay: value
       })
+    },
+    setOrder (order, el) {
+      this.id = order.id
+      this.customer = order.customer
+      this.dish = order.dish
+      this.price = order.price
+      this.modalName = el
+      this.showModal()
+    },
+    showModal () {
+      $('.overflow').show()
+      $(this.modalName).show()
+    },
+    hideModal () {
+      $('.overflow').hide()
+      $(this.modalName).hide()
+      this.modalName = null
+    },
+    updateOrder () {
+      this.updateOrderStatus = true
+      db.collection('orders').doc(this.id).update({
+        customer: this.customer,
+        dish: this.dish,
+        price: this.price
+      }).then(() => {
+        this.id = null
+        this.customer = null
+        this.dish = null
+        this.price = null
+        this.hideModal(this.modalName)
+      })
     }
   },
   created () {
@@ -153,6 +230,7 @@ export default {
     db.collection('orders').where('accepted', '==', true)
       .onSnapshot((snapshot) => {
         snapshot.docChanges().forEach(change => {
+          console.log(change)
           if (change.type === 'added') {
             this.orders.push({
               id: change.doc.id,
@@ -168,6 +246,9 @@ export default {
           if (change.type === 'modified') {
             this.orders = this.orders.map(function (order) {
               if (order.id === change.doc.id) {
+                order.customer = change.doc.data().customer
+                order.dish = change.doc.data().dish
+                order.price = change.doc.data().price
                 order.ispay = change.doc.data().ispay
               }
               return order
@@ -195,6 +276,9 @@ export default {
           if (change.type === 'modified') {
             this.ordersNew = this.ordersNew.map(function (order) {
               if (order.id === change.doc.id) {
+                order.customer = change.doc.data().customer
+                order.dish = change.doc.data().dish
+                order.price = change.doc.data().price
                 order.ispay = change.doc.data().ispay
               }
               return order

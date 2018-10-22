@@ -80,6 +80,9 @@ export default {
           if (change.type === 'modified') {
             this.orders = this.orders.map(function (order) {
               if (order.id === change.doc.id) {
+                order.customer = change.doc.data().customer
+                order.dish = change.doc.data().dish
+                order.price = change.doc.data().price
                 order.ispay = change.doc.data().ispay
               }
               return order

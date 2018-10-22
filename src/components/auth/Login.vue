@@ -138,6 +138,6 @@ export default {
 
 <style scoped>
   .container { width: 70%; display: block; }
-  .card { margin: 150px auto 0; max-width: 400px; width: 100%; }
+  .card { margin: 20% auto 0; max-width: 400px; width: 100%; }
   .row { margin-bottom: 0; }
 </style>
