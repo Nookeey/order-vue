@@ -5,7 +5,7 @@
         <ul class="collection with-header">
           <li class="collection-header"><span class="card-title teal-text darken-1">SZCZEGÓŁY ZAMÓWIENIA</span></li>
           <li class="collection-item"><div class="d-grid"><span class="item">Zamawia:</span><span class="value">{{ person }}</span></div></li>
-          <li class="collection-item"><div class="d-grid"><span class="item">Restauracja:</span><span class="value">{{ restaurant }}</span></div></li>
+          <li class="collection-item"><div class="d-grid"><span class="item">Restauracja:</span><span class="value">{{ restaurant }}<a :href="link"><span class="new badge blue">link</span></a></span></div></li>
           <li class="collection-item"><div class="d-grid"><span class="item">Informacja:</span><span class="value">{{ info }}</span></div></li>
           <li class="collection-item"><div class="d-grid"><span class="item">Deadline:</span><span class="value">{{ deadline }}</span></div></li>
           <li class="collection-item" style="height: 43px;"></li>
@@ -24,33 +24,49 @@
             <span class="card-title teal-text darken-1">EDYTUJ ZAMOWIENIE</span>
           </div>
           <div class="row">
-            <div class="input-field col s12">
-              <input id="person" type="text" v-model="person">
-              <label for="person" class="active">Zamawia</label>
+            <div class="col s8">
+              <div class="row">
+                <div class="input-field col s12">
+                  <input id="person" type="text" v-model="person">
+                  <label for="person" class="active">Zamawia</label>
+                </div>
+              </div>
+              <div class="row">
+                <div class="input-field col s12">
+                  <input id="restaurant" type="text" v-model="restaurant">
+                  <label for="restaurant" class="active">Restauracja</label>
+                </div>
+              </div>
+              <div class="row">
+                <div class="input-field col s12">
+                  <input id="link" type="text" v-model="link">
+                  <label for="link" class="active">Link</label>
+                </div>
+              </div>
+              <div class="row">
+                <div class="input-field col s12">
+                  <textarea id="info" class="materialize-textarea" v-model="info"></textarea>
+                  <label for="info" class="active">Informacja</label>
+                </div>
+              </div>
+              <div class="row">
+                <div class="input-field col s12">
+                  <input id="deadline" type="time" v-model="deadline">
+                  <label for="deadline" class="active">Deadline</label>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="row">
-            <div class="input-field col s12">
-              <input id="restaurant" type="text" v-model="restaurant">
-              <label for="restaurant" class="active">Restauracja</label>
-            </div>
-          </div>
-          <div class="row">
-            <div class="input-field col s12">
-              <input id="link" type="text" v-model="link">
-              <label for="link" class="active">Link</label>
-            </div>
-          </div>
-          <div class="row">
-            <div class="input-field col s12">
-              <textarea id="info" class="materialize-textarea" v-model="info"></textarea>
-              <label for="info" class="active">Informacja</label>
-            </div>
-          </div>
-          <div class="row">
-            <div class="input-field col s12">
-              <input id="deadline" type="time" v-model="deadline">
-              <label for="deadline" class="active">Deadline</label>
+            <div class="col s4">
+              <div class="row">
+                <div class="input-field col s12">
+                  <label for="deadline" class="active">Deadline</label>
+                  <v-layout row wrap>
+                    <v-flex>
+                      <v-time-picker v-model="deadline" format="24hr" min="9:00" max="13:00"></v-time-picker>
+                    </v-flex>
+                  </v-layout>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -114,6 +130,13 @@ export default {
           }
         })
       })
+
+    setTimeout(() => {
+      console.log(this.deadline)
+      const hours = this.deadline.match(/^(\d+)/)[1]
+      const minutes = this.deadline.match(/:(\d+)/)[1]
+      console.log([parseInt(hours), parseInt(minutes)])
+    }, 1000)
   },
   methods: {
     logout () {
@@ -128,7 +151,7 @@ export default {
         restaurant: this.restaurant,
         link: this.link,
         info: this.info,
-        deadline: Date.parse(this.deadline + ':00')
+        deadline: this.deadline
       }).then(() => {
         this.hideModal()
       })
@@ -149,4 +172,9 @@ export default {
 <style>
   #info-order .collection-item .d-grid { display: grid; grid-template-columns: 110px 1fr; }
   #info-order .collection-item .d-grid .item { font-weight: 600; }
+  #info-order .value { position: relative; }
+  #info-order .value .badge { position: absolute; }
+  .v-card>:first-child:not(.v-btn):not(.v-chip) { background: #00796b; }
+  .accent { background-color: #82b1ff !important; border-color: #82b1ff !important; }
+  .child-flex>*, .flex { flex: unset; max-width: 100%; display: block; margin: 15px auto 0; }
 </style>

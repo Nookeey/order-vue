@@ -22,7 +22,7 @@ export default {
   .alert-danger { background-color: #f44336 !important; }
   .alert-success { background-color: #4caf50 !important; }
   .overflow { display: none; position: fixed; top: 0; left: 0; width: 100%; min-height: 100vh; height: 100%; background: rgba(0, 0, 0, 0.486); z-index: 998; }
-  .modal { top: 20%; left: 0; right: 0; z-index: 999; max-height: 100%; }
+  .modal { top: 50px; left: 0; right: 0; z-index: 999; max-height: 100%; }
   .modal .row { margin-bottom: 0; }
   .modal .row.mb { margin-bottom: 2em; }
 </style>
