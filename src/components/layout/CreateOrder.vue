@@ -66,12 +66,8 @@ export default {
   created () {
     setInterval(() => {
       let currnetTime = moment(Date.now()).format('LT')
-      let deadlineHours = this.deadline.match(/^(\d+)/)[1]
-      let deadlineMinutes = this.deadline.match(/:(\d+)/)[1]
-      let currnetTimeHours = currnetTime.match(/^(\d+)/)[1]
-      let currnetTimeMinutes = currnetTime.match(/:(\d+)/)[1]
-      let deadlineTemp = parseInt(deadlineHours + deadlineMinutes)
-      let currnetTimeTemp = parseInt(currnetTimeHours + currnetTimeMinutes)
+      let deadlineTemp = parseInt(this.deadline.match(/^(\d+)/)[1] + this.deadline.match(/:(\d+)/)[1])
+      let currnetTimeTemp = parseInt(currnetTime.match(/^(\d+)/)[1] + currnetTime.match(/:(\d+)/)[1])
       if (currnetTimeTemp >= deadlineTemp) {
         this.deadlineStatus = false
       } else {
