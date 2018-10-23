@@ -46,6 +46,8 @@
 import CreateOrder from '../layout/CreateOrder'
 import InfoOrder from '../layout/InfoOrder'
 import db from '../../firebase/init'
+import firebase from 'firebase'
+import moment from 'moment'
 
 export default {
   name: 'UserOrders',
@@ -55,12 +57,30 @@ export default {
   },
   data () {
     return {
-      orders: []
+      orders: [],
+      timestamp: Date.now()
     }
   },
   methods: {
+    logoutIfNewDay () {
+      let user = firebase.auth().currentUser
+      if (user) {
+        let ref = db.collection('admin').doc('admin')
+        ref.get().then(doc => {
+          if (doc.exists) {
+            if (doc.data().timestamp !== moment(this.timestamp).format('l')) {
+              firebase.auth().signOut().then(() => {
+                this.$router.push({ name: 'Login' })
+              })
+            }
+          }
+        })
+      }
+    }
   },
   created () {
+    this.logoutIfNewDay()
+
     // get accepted orders
     db.collection('orders').where('accepted', '==', true)
       .onSnapshot((snapshot) => {

@@ -65,20 +65,21 @@ export default {
   },
   created () {
     setInterval(() => {
-      let currnetTime = moment(Date.now()).format('LT')
-      let deadlineTemp = parseInt(this.deadline.match(/^(\d+)/)[1] + this.deadline.match(/:(\d+)/)[1])
-      let currnetTimeTemp = parseInt(currnetTime.match(/^(\d+)/)[1] + currnetTime.match(/:(\d+)/)[1])
-      if (currnetTimeTemp >= deadlineTemp) {
-        this.deadlineStatus = false
-      } else {
-        this.deadlineStatus = true
+      if (this.deadline) {
+        let currnetTime = moment(Date.now()).format('LT')
+        let deadlineTemp = parseInt(this.deadline.match(/^(\d+)/)[1] + this.deadline.match(/:(\d+)/)[1])
+        let currnetTimeTemp = parseInt(currnetTime.match(/^(\d+)/)[1] + currnetTime.match(/:(\d+)/)[1])
+        if (currnetTimeTemp >= deadlineTemp) {
+          this.deadlineStatus = false
+        } else {
+          this.deadlineStatus = true
+        }
       }
     }, 1000)
 
     db.collection('information')
       .onSnapshot((snapshot) => {
         snapshot.docChanges().forEach(change => {
-          console.log(change)
           if (change.type === 'added') {
             this.deadline = change.doc.data().deadline
           }

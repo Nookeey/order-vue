@@ -39,38 +39,20 @@ export default {
   name: 'LoginOrder',
   data () {
     return {
-      email: 'ordernh@order.com',
+      email: 'test@test.com',
       pass: 'haslo1234',
       password: null,
       feedback: null,
       timestamp: Date.now()
     }
   },
-  created () {
-    this.logoutIfNewDay()
-  },
   methods: {
-    logoutIfNewDay () {
-      let user = firebase.auth().currentUser
-      if (user) {
-        let ref = db.collection('admin').doc('admin')
-        ref.get().then(doc => {
-          if (doc.exists) {
-            if (moment(doc.data().timestamp).format('l') !== moment(this.timestamp).format('l')) {
-              firebase.auth().signOut().then(() => {
-                this.$router.push({ name: 'Login' })
-              })
-            }
-          }
-        })
-      }
-    },
     login () {
       if (this.password) {
         let ref = db.collection('admin').doc('admin')
         ref.get().then(doc => {
           if (doc.exists) {
-            if (moment(doc.data().timestamp).format('l') === moment(this.timestamp).format('l')) {
+            if (doc.data().timestamp === moment(this.timestamp).format('l')) {
               if (doc.data().password === this.password) {
                 firebase.auth().signInWithEmailAndPassword(this.email, this.pass)
                   .then(() => {
@@ -98,31 +80,13 @@ export default {
                 })
                 .catch(err => {
                   console.log(err)
+                  if (err.code === 'auth/user-not-found') {
+                    this.createNewUser()
+                  }
                 })
             }
           } else {
-            firebase.auth().createUserWithEmailAndPassword(this.email, this.pass)
-              .then(cred => {
-                ref.set({
-                  password: this.password,
-                  timestamp: moment(Date.now()).format('l')
-                })
-              })
-              .then(() => {
-                this.$router.push({ name: 'AdminOrders' })
-              })
-              .catch(err => {
-                console.log(err)
-                if (err.code === 'auth/email-already-in-use') {
-                  ref.set({
-                    password: this.password,
-                    timestamp: moment(Date.now()).format('l')
-                  })
-                    .then(() => {
-                      this.$router.push({ name: 'AdminOrders' })
-                    })
-                }
-              })
+            this.createNewUser()
           }
         })
       } else {
@@ -131,6 +95,31 @@ export default {
           this.feedback = null
         }, 4000)
       }
+    },
+    createNewUser () {
+      let ref = db.collection('admin').doc('admin')
+      firebase.auth().createUserWithEmailAndPassword(this.email, this.pass)
+        .then(cred => {
+          ref.set({
+            password: this.password,
+            timestamp: moment(Date.now()).format('l')
+          })
+        })
+        .then(() => {
+          this.$router.push({ name: 'AdminOrders' })
+        })
+        .catch(err => {
+          console.log(err)
+          if (err.code === 'auth/email-already-in-use') {
+            ref.set({
+              password: this.password,
+              timestamp: moment(Date.now()).format('l')
+            })
+              .then(() => {
+                this.$router.push({ name: 'AdminOrders' })
+              })
+          }
+        })
     }
   }
 }

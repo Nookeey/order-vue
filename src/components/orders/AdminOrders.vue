@@ -151,7 +151,8 @@ export default {
       ordersNew: [],
       feedback: null,
       modalName: null,
-      updateOrderStatus: false
+      updateOrderStatus: false,
+      timestamp: Date.now()
     }
   },
   methods: {
@@ -161,7 +162,7 @@ export default {
         let ref = db.collection('admin').doc('admin')
         ref.get().then(doc => {
           if (doc.exists) {
-            if (moment(doc.data().timestamp).format('l') !== moment(this.timestamp).format('l')) {
+            if (doc.data().timestamp !== moment(this.timestamp).format('l')) {
               firebase.auth().signOut().then(() => {
                 this.$router.push({ name: 'Login' })
               })
@@ -226,11 +227,11 @@ export default {
   },
   created () {
     this.logoutIfNewDay()
+
     // get accepted orders
     db.collection('orders').where('accepted', '==', true)
       .onSnapshot((snapshot) => {
         snapshot.docChanges().forEach(change => {
-          console.log(change)
           if (change.type === 'added') {
             this.orders.push({
               id: change.doc.id,

@@ -113,7 +113,6 @@ export default {
     db.collection('information')
       .onSnapshot((snapshot) => {
         snapshot.docChanges().forEach(change => {
-          console.log(change)
           if (change.type === 'added') {
             this.person = change.doc.data().person
             this.restaurant = change.doc.data().restaurant
