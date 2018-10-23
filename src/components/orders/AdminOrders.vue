@@ -11,6 +11,7 @@
             </div>
             <div class="row">
               <table>
+                <a @click="showModalAgree('#modalAgreeDeleteAllOrders', 'accepted')" class="btn-floating btn-large waves-effect waves-light red halfway-fab right delete-all-orders"><i class="material-icons">delete_forever</i></a>
                 <thead>
                   <tr>
                     <th>#</th>
@@ -52,6 +53,7 @@
             </div>
             <div class="row">
               <table>
+                <a @click="showModalAgree('#modalAgreeDeleteAllOrders', 'new')" class="btn-floating btn-large waves-effect waves-light red halfway-fab right delete-all-orders"><i class="material-icons">delete_forever</i></a>
                 <thead>
                   <tr>
                     <th>#</th>
@@ -74,7 +76,7 @@
                       <label @click="setIsPay(order.id, true)" v-if="!order.ispay"><input type="checkbox"/><span></span></label>
                     </td>
                     <td class="right-align">
-                      <a @click="deleteNewOrder(order.id)" class="btn-floating btn-small waves-effect waves-light red"><i class="material-icons">delete_forever</i></a>
+                      <a @click="deleteOrder(order.id)" class="btn-floating btn-small waves-effect waves-light red"><i class="material-icons">delete_forever</i></a>
                       <a @click="setOrder(order, '#modalUpdateOrder')" class="btn-floating btn-small waves-effect waves-light blue"><i class="material-icons">create</i></a>
                       <a @click="accept(order.id)" class="btn-floating btn-small waves-effect waves-light green"><i class="material-icons">check</i></a>
                     </td>
@@ -124,6 +126,20 @@
       </form>
     </div>
     <!-- END MODAL UPDATE ORDER -->
+
+    <!-- START MODAL AGREE DELETE ALL ORDERS-->
+    <div id="modalAgreeDeleteAllOrders" class="modal">
+      <div class="modal-content">
+        <div class="row">
+          <span class="card-title teal-text darken-1">Usunąć wszystkie zamówenia?</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a @click="hideModalAgree('#modalAgreeDeleteAllOrders')" class="modal-close waves-effect waves-green btn-flat">Nie</a>
+        <button @click="deleteAllOrders('#modalAgreeDeleteAllOrders')" class="waves-effect waves-light btn teal darken-2">Tak</button>
+      </div>
+    </div>
+    <!-- END MODAL AGREE DELETE ALL ORDERS -->
   </div>
 </template>
 
@@ -152,7 +168,8 @@ export default {
       feedback: null,
       modalName: null,
       updateOrderStatus: false,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      arrayName: null
     }
   },
   methods: {
@@ -179,12 +196,8 @@ export default {
         this.ordersNew = this.ordersNew.filter(order => order.id !== id)
       }).catch(err => console.log(err))
     },
-    // delete accepted order
+    // delete order
     deleteOrder (id) {
-      db.collection('orders').doc(id).delete()
-    },
-    // delete new order
-    deleteNewOrder (id) {
       db.collection('orders').doc(id).delete()
     },
     // set ispay
@@ -223,6 +236,24 @@ export default {
         this.price = null
         this.hideModal(this.modalName)
       })
+    },
+    showModalAgree (el, arrayName) {
+      this.arrayName = arrayName
+      $('.overflow').show()
+      $(el).show()
+    },
+    hideModalAgree (el) {
+      $('.overflow').hide()
+      $(el).hide()
+    },
+    deleteAllOrders () {
+      if (this.arrayName === 'accepted') {
+        this.orders.forEach(order => db.collection('orders').doc(order.id).delete())
+      } else if (this.arrayName === 'new') {
+        this.ordersNew.forEach(order => db.collection('orders').doc(order.id).delete())
+      }
+      this.hideModalAgree('#modalAgreeDeleteAllOrders')
+      this.arrayName = null
     }
   },
   created () {
@@ -295,4 +326,5 @@ export default {
   td { position: relative; }
   td .fixed-action-btn.direction-left ul, .fixed-action-btn.direction-right ul { right: 40px; }
   td .fixed-action-btn.direction-left ul li, .fixed-action-btn.direction-right ul li { margin: 4px 15px 0 0; }
+  a.btn-floating.btn-large.waves-effect.waves-light.red.halfway-fab.right.delete-all-orders { top: -28px; }
 </style>

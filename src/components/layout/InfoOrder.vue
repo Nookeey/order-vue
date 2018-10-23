@@ -24,7 +24,7 @@
             <span class="card-title teal-text darken-1">EDYTUJ ZAMOWIENIE</span>
           </div>
           <div class="row">
-            <div class="col s8">
+            <div class="col s12">
               <div class="row">
                 <div class="input-field col s12">
                   <input id="person" type="text" v-model="person">
@@ -56,7 +56,7 @@
                 </div>
               </div>
             </div>
-            <div class="col s4">
+            <!-- <div class="col s4">
               <div class="row">
                 <div class="input-field col s12">
                   <label for="deadline" class="active">Deadline</label>
@@ -67,7 +67,7 @@
                   </v-layout>
                 </div>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
         <div class="modal-footer">
@@ -166,6 +166,7 @@ export default {
   #info-order .collection-item .d-grid .item { font-weight: 600; }
   #info-order .value { position: relative; }
   #info-order .value .badge { position: absolute; }
+  #info-order .value span.badge.new:after { content: ""; }
   .v-card>:first-child:not(.v-btn):not(.v-chip) { background: #00796b; }
   .accent { background-color: #82b1ff !important; border-color: #82b1ff !important; }
   .child-flex>*, .flex { flex: unset; max-width: 100%; display: block; margin: 15px auto 0; }
