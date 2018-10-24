@@ -7,7 +7,10 @@
           <li class="collection-item"><div class="d-grid"><span class="item">Zamawia:</span><span class="value">{{ person }}</span></div></li>
           <li class="collection-item"><div class="d-grid"><span class="item">Restauracja:</span><span class="value">{{ restaurant }}<a :href="link"><span class="new badge blue">link</span></a></span></div></li>
           <li class="collection-item"><div class="d-grid"><span class="item">Informacja:</span><span class="value">{{ info }}</span></div></li>
-          <li class="collection-item"><div class="d-grid"><span class="item">Deadline:</span><span class="value">{{ deadline }}</span></div></li>
+          <li class="collection-item" style="position: relative; z-index: 99;"><div class="d-grid"><span class="item">Deadline:</span><span class="value">{{ deadline }}</span></div></li>
+          <transition name="alert-in" enter-active-class="animated slideInDown" leave-active-class="animated slideOutUp">
+            <li v-if="deadlineStatus" v-bind:class="{ 'red-text': countdownTimeRed }" class="collection-item"><div class="d-grid"><span class="item">Koniec za:</span><span class="value" style="font-weight: 600">{{ countdownTime }}</span></div></li>
+          </transition>
           <li class="collection-item" style="height: 43px;"></li>
         </ul>
         <a v-if="user && admin" @click="logout" class="btn-floating btn-large waves-effect waves-light red halfway-fab left"><i class="material-icons">exit_to_app</i></a>
@@ -56,18 +59,6 @@
                 </div>
               </div>
             </div>
-            <!-- <div class="col s4">
-              <div class="row">
-                <div class="input-field col s12">
-                  <label for="deadline" class="active">Deadline</label>
-                  <v-layout row wrap>
-                    <v-flex>
-                      <v-time-picker v-model="deadline" format="24hr" min="9:00" max="13:00"></v-time-picker>
-                    </v-flex>
-                  </v-layout>
-                </div>
-              </div>
-            </div> -->
           </div>
         </div>
         <div class="modal-footer">
@@ -84,6 +75,7 @@
 import firebase from 'firebase'
 import db from '../../firebase/init'
 import $ from 'jquery'
+import countdownMixin from '../../mixins/countdownMixin'
 
 export default {
   name: 'InfoOrder',
@@ -95,7 +87,10 @@ export default {
       restaurant: null,
       link: null,
       info: null,
-      deadline: null
+      deadline: '08:00',
+      deadlineStatus: true,
+      countdownTime: null,
+      countdownTimeRed: false
     }
   },
   created () {
@@ -156,7 +151,8 @@ export default {
       $('.overflow').hide()
       $('#modalUpdateInformation').hide()
     }
-  }
+  },
+  mixins: [countdownMixin]
 }
 
 </script>

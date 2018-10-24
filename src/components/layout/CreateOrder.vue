@@ -41,12 +41,8 @@
 </template>
 
 <script>
-// eslint-disable-next-line
-import firebase from 'firebase'
 import db from '../../firebase/init'
-// eslint-disable-next-line
-import moment from 'moment'
-import 'moment/locale/pl'
+import countdownMixin from '../../mixins/countdownMixin'
 
 export default {
   name: 'CreateOrder',
@@ -59,24 +55,11 @@ export default {
       customer: null,
       price: null,
       dish: null,
-      deadline: null,
+      deadline: '08:00',
       deadlineStatus: true
     }
   },
   created () {
-    setInterval(() => {
-      if (this.deadline) {
-        let currnetTime = moment(Date.now()).format('LT')
-        let deadlineTemp = parseInt(this.deadline.match(/^(\d+)/)[1] + this.deadline.match(/:(\d+)/)[1])
-        let currnetTimeTemp = parseInt(currnetTime.match(/^(\d+)/)[1] + currnetTime.match(/:(\d+)/)[1])
-        if (currnetTimeTemp >= deadlineTemp) {
-          this.deadlineStatus = false
-        } else {
-          this.deadlineStatus = true
-        }
-      }
-    }, 1000)
-
     db.collection('information')
       .onSnapshot((snapshot) => {
         snapshot.docChanges().forEach(change => {
@@ -116,7 +99,8 @@ export default {
         }, 2000)
       }
     }
-  }
+  },
+  mixins: [countdownMixin]
 }
 </script>
 

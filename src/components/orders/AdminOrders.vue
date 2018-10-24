@@ -11,7 +11,9 @@
             </div>
             <div class="row">
               <table>
-                <a @click="showModalAgree('#modalAgreeDeleteAllOrders', 'accepted')" class="btn-floating btn-large waves-effect waves-light red halfway-fab right delete-all-orders"><i class="material-icons">delete_forever</i></a>
+                <transition name="alert-in" enter-active-class="animated zoomIn" leave-active-class="animated zoomOut">
+                  <a v-if="orders.length > 0" @click="showModalAgree('#modalAgreeDeleteAllOrders', 'accepted')" class="btn-floating btn-large waves-effect waves-light red halfway-fab right delete-all-orders"><i class="material-icons">delete_forever</i></a>
+                </transition>
                 <thead>
                   <tr>
                     <th>#</th>
@@ -53,7 +55,9 @@
             </div>
             <div class="row">
               <table>
-                <a @click="showModalAgree('#modalAgreeDeleteAllOrders', 'new')" class="btn-floating btn-large waves-effect waves-light red halfway-fab right delete-all-orders"><i class="material-icons">delete_forever</i></a>
+                <transition name="alert-in" enter-active-class="animated zoomIn" leave-active-class="animated zoomOut">
+                  <a v-if="ordersNew.length > 0" @click="showModalAgree('#modalAgreeDeleteAllOrders', 'new')" class="btn-floating btn-large waves-effect waves-light red halfway-fab right delete-all-orders"><i class="material-icons">delete_forever</i></a>
+                </transition>
                 <thead>
                   <tr>
                     <th>#</th>
@@ -147,9 +151,9 @@
 import CreateOrder from '../layout/CreateOrder'
 import InfoOrder from '../layout/InfoOrder'
 import db from '../../firebase/init'
-import firebase from 'firebase'
-import moment from 'moment'
 import $ from 'jquery'
+import getAcceptedOrdersMixin from '../../mixins/getAcceptedOrdersMixin'
+import logoutIfNewDayMixin from '../../mixins/logoutIfNewDayMixin'
 
 export default {
   name: 'AdminOrders',
@@ -173,21 +177,6 @@ export default {
     }
   },
   methods: {
-    logoutIfNewDay () {
-      let user = firebase.auth().currentUser
-      if (user) {
-        let ref = db.collection('admin').doc('admin')
-        ref.get().then(doc => {
-          if (doc.exists) {
-            if (doc.data().timestamp !== moment(this.timestamp).format('l')) {
-              firebase.auth().signOut().then(() => {
-                this.$router.push({ name: 'Login' })
-              })
-            }
-          }
-        })
-      }
-    },
     // accept order
     accept (id) {
       db.collection('orders').doc(id).update({
@@ -257,38 +246,6 @@ export default {
     }
   },
   created () {
-    this.logoutIfNewDay()
-
-    // get accepted orders
-    db.collection('orders').where('accepted', '==', true)
-      .onSnapshot((snapshot) => {
-        snapshot.docChanges().forEach(change => {
-          if (change.type === 'added') {
-            this.orders.push({
-              id: change.doc.id,
-              customer: change.doc.data().customer,
-              price: change.doc.data().price,
-              dish: change.doc.data().dish,
-              ispay: change.doc.data().ispay
-            })
-          }
-          if (change.type === 'removed') {
-            this.orders = this.orders.filter(order => order.id !== change.doc.id)
-          }
-          if (change.type === 'modified') {
-            this.orders = this.orders.map(function (order) {
-              if (order.id === change.doc.id) {
-                order.customer = change.doc.data().customer
-                order.dish = change.doc.data().dish
-                order.price = change.doc.data().price
-                order.ispay = change.doc.data().ispay
-              }
-              return order
-            })
-          }
-        })
-      })
-
     // get not accepted orders
     db.collection('orders').where('accepted', '==', false)
       .onSnapshot((snapshot) => {
@@ -318,7 +275,8 @@ export default {
           }
         })
       })
-  }
+  },
+  mixins: [getAcceptedOrdersMixin, logoutIfNewDayMixin]
 }
 </script>
 

@@ -45,9 +45,8 @@
 <script>
 import CreateOrder from '../layout/CreateOrder'
 import InfoOrder from '../layout/InfoOrder'
-import db from '../../firebase/init'
-import firebase from 'firebase'
-import moment from 'moment'
+import getAcceptedOrdersMixin from '../../mixins/getAcceptedOrdersMixin'
+import logoutIfNewDayMixin from '../../mixins/logoutIfNewDayMixin'
 
 export default {
   name: 'UserOrders',
@@ -61,56 +60,7 @@ export default {
       timestamp: Date.now()
     }
   },
-  methods: {
-    logoutIfNewDay () {
-      let user = firebase.auth().currentUser
-      if (user) {
-        let ref = db.collection('admin').doc('admin')
-        ref.get().then(doc => {
-          if (doc.exists) {
-            if (doc.data().timestamp !== moment(this.timestamp).format('l')) {
-              firebase.auth().signOut().then(() => {
-                this.$router.push({ name: 'Login' })
-              })
-            }
-          }
-        })
-      }
-    }
-  },
-  created () {
-    this.logoutIfNewDay()
-
-    // get accepted orders
-    db.collection('orders').where('accepted', '==', true)
-      .onSnapshot((snapshot) => {
-        snapshot.docChanges().forEach(change => {
-          if (change.type === 'added') {
-            this.orders.push({
-              id: change.doc.id,
-              customer: change.doc.data().customer,
-              price: change.doc.data().price,
-              dish: change.doc.data().dish,
-              ispay: change.doc.data().ispay
-            })
-          }
-          if (change.type === 'removed') {
-            this.orders = this.orders.filter(order => order.id !== change.doc.id)
-          }
-          if (change.type === 'modified') {
-            this.orders = this.orders.map(function (order) {
-              if (order.id === change.doc.id) {
-                order.customer = change.doc.data().customer
-                order.dish = change.doc.data().dish
-                order.price = change.doc.data().price
-                order.ispay = change.doc.data().ispay
-              }
-              return order
-            })
-          }
-        })
-      })
-  }
+  mixins: [getAcceptedOrdersMixin, logoutIfNewDayMixin]
 }
 </script>
 
